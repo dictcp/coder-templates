@@ -13,19 +13,23 @@ terraform {
 
 locals {
   username = "coder"
+  docker_arch = "amd64"
+  # docker_arch = "arm64"
 }
 
 data "coder_provisioner" "me" {
 }
 
 provider "docker" {
+  host = "unix:///var/run/docker.sock"
+  # host = "ssh://ubuntu@j2.docksify.com"
 }
 
 data "coder_workspace" "me" {
 }
 
 resource "coder_agent" "main" {
-  arch                   = var.docker_arch
+  arch                   = local.docker_arch
   os                     = "linux"
   startup_script_timeout = 180
   startup_script = <<-EOT
@@ -117,7 +121,7 @@ resource "coder_app" "code-server" {
   agent_id     = coder_agent.main.id
   slug         = "code-server"
   display_name = "code-server"
-  url          = "http://localhost:13337/?folder=/home/coder/workspaces"
+  url          = "http://localhost:13337/?folder=/home/${local.username}/workspaces"
   icon         = "/icon/code.svg"
   subdomain    = false
   share        = "owner"
